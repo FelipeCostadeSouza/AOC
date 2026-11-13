@@ -362,13 +362,23 @@ ProcessarEscudo PROC
 
     INVOKE GetAsyncKeyState, VK_DOWN
     test ax, 8000h
-    jz DesativarEscudo
+    jz DesativarEscudo          
 
     mov hitboxEscudoAtivo, 1
-    ret
+
+    mov eax, player_x
+    mov hbxX, eax               
+
+    mov eax, player_y
+    sub eax, TAMANHO_TILE       
+    mov hbxY, eax
+    
+    jmp FimProcessamento        
 
 DesativarEscudo:
-    mov hitboxEscudoAtivo, 0
+    mov hitboxEscudoAtivo, 0    
+
+FimProcessamento:
     ret
 ProcessarEscudo ENDP
 
