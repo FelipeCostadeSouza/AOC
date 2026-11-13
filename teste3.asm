@@ -174,6 +174,9 @@ spriteJogador2  db 32, 32
 spriteEscudo    db 32, 12
                 dd 12 dup(32 dup(00FF8800h)) ; Barra retangular de 32x12 pixels
 
+spriteProj      db 16, 16
+                dd 16 dup(00FFFF00h)
+
 .code
 
 ; =========================================================================
