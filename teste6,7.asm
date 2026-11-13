@@ -42,31 +42,6 @@ WNDCLASSEX_STRUCT STRUCT
     cbWndExtra      DWORD 0
     hInstance       DWORD ?
     hIcon           DWORD 0ChecarArmadilha2 PROC
-    mov eax, p2_y
-    add eax, 16
-    xor edx, edx
-    mov ecx, TAMANHO_TILE
-    div ecx
-    mov ebx, LARGURA_MAPA
-    mul ebx
-    mov ecx, eax
-
-    mov eax, p2_x
-    add eax, 16
-    xor edx, edx
-    mov ebx, TAMANHO_TILE
-    div ebx
-    add ecx, eax
-
-    mov bl, byte ptr [mapa + ecx]
-    cmp bl, 2
-    jne FimArmadilha2
-
-    CALL ResetarFase
-
-FimArmadilha2:
-    ret
-ChecarArmadilha2 ENDP
     hCursor         DWORD 0
     hbrBackground   DWORD 0
     lpszMenuName    DWORD 0
@@ -170,25 +145,25 @@ spriteArmadilha db 32, 32
                 dd 2 dup(8 dup(0), 16 dup(000000FFh), 8 dup(0))
                 dd 2 dup(6 dup(0), 20 dup(000000FFh), 6 dup(0))
                 dd 2 dup(4 dup(0), 24 dup(000000FFh), 4 dup(0))
-                dd 2 dup(0 dup(0), 32 dup(000000FFh))
+                dd 2 dup(32 dup(000000FFh))
 
 spriteJogador   db 32, 32
                 dd 4 dup(32 dup(00000000h))
-                dd 4 dup(10 dup(0), 4 dup(0000FF00h), 4 dup(00FFFFFFh), 4 dup(0000FF00h), 4 dup(00FFFFFFh), 6 dup(0000FF00h), 0 dup(0))
+                dd 4 dup(10 dup(0), 4 dup(0000FF00h), 4 dup(00FFFFFFh), 4 dup(0000FF00h), 4 dup(00FFFFFFh), 6 dup(0000FF00h))
                 dd 20 dup(6 dup(0), 20 dup(0000FF00h), 6 dup(0))
                 dd 4 dup(6 dup(0), 8 dup(0000C000h), 4 dup(0), 8 dup(0000C000h), 6 dup(0))
 
 spriteJogador2  db 32, 32
                 dd 4 dup(32 dup(00000000h))
-                dd 4 dup(10 dup(0), 4 dup(000088FFh), 4 dup(00FFFFFFh), 4 dup(000088FFh), 4 dup(00FFFFFFh), 6 dup(000088FFh), 0 dup(0))
+                dd 4 dup(10 dup(0), 4 dup(000088FFh), 4 dup(00FFFFFFh), 4 dup(000088FFh), 4 dup(00FFFFFFh), 6 dup(000088FFh))
                 dd 20 dup(6 dup(0), 20 dup(000088FFh), 6 dup(0))
                 dd 4 dup(6 dup(0), 8 dup(000044AAh), 4 dup(0), 8 dup(000044AAh), 6 dup(0))
 
 spriteEscudo    db 32, 12
-                dd 12 dup(32 dup(00FF8800h)) ; Barra retangular de 32x12 pixels
+                dd 12 dup(32 dup(00FF8800h))
 
 spriteProj      db 16, 16
-                dd 16 dup(00FFFF00h)
+                dd 16 dup(16 dup(00FFFF00h))
 
 .code
 
@@ -666,7 +641,6 @@ P2_FimEntrada:
     ret
 ProcessarEntradaP2 ENDP
 
-AtualizarFisicaP2 PROC
 AtualizarFisicaP2 PROC
     LOCAL novoY:DWORD, yPe:DWORD
 
