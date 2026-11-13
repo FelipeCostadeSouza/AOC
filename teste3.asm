@@ -300,10 +300,6 @@ ChecarArmadilha PROC
     mov velocidade_y, 0
     mov estaNoChao, 0
 
-FimArmadilha2:
-    ret
-ChecarArmadilha2 ENDP
-
 FimArmadilha:
     ret
 ChecarArmadilha ENDP
@@ -333,6 +329,9 @@ ChecarArmadilhaP2 PROC
     mov p2_y, POS_INICIAL_Y
     mov p2_velocidade_y, 0
     mov p2_estaNoChao, 0
+FimArmadilha2:
+    ret
+ChecarArmadilha2 ENDP
 
 ProcessarEscudo PROC
     LOCAL hbxX:DWORD, hbxY:DWORD
