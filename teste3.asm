@@ -300,6 +300,11 @@ ChecarArmadilha PROC
     mov velocidade_y, 0
     mov estaNoChao, 0
 
+    mov p2_x, POS_INICIAL_X
+    mov p2_y, POS_INICIAL_Y
+    mov p2_velocidade_y, 0
+    mov p2_estaNoChao, 0
+
 FimArmadilha:
     ret
 ChecarArmadilha ENDP
@@ -329,6 +334,11 @@ ChecarArmadilhaP2 PROC
     mov p2_y, POS_INICIAL_Y
     mov p2_velocidade_y, 0
     mov p2_estaNoChao, 0
+
+    mov player_x, POS_INICIAL_X
+    mov player_y, POS_INICIAL_Y
+    mov velocidade_y, 0
+    mov estaNoChao, 0
 FimArmadilha2:
     ret
 ChecarArmadilha2 ENDP
