@@ -69,7 +69,7 @@ ALTURA_MAPA     EQU 13
 TAMANHO_TILE    EQU 32
 
 POS_INICIAL_X   EQU 64
-POS_INICIAL_Y   EQU 352     ; Linha 11 (para ficar apoiado no chão da linha 12)
+POS_INICIAL_Y   EQU 352     
 VELOCIDADE      EQU 4
 
 FORCA_PULO      EQU -12
@@ -112,7 +112,7 @@ player_y            DWORD POS_INICIAL_Y
 velocidade_y        SDWORD 0
 estaNoChao          DWORD 0
 hitboxEscudoAtivo   DWORD 0     
-p2_x                DWORD 128   
+p2_x                DWORD POS_INICIAL_X  
 p2_y                DWORD POS_INICIAL_Y
 p2_velocidade_y     SDWORD 0
 p2_estaNoChao       DWORD 0
