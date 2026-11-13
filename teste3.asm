@@ -300,6 +300,10 @@ ChecarArmadilha PROC
     mov velocidade_y, 0
     mov estaNoChao, 0
 
+FimArmadilha2:
+    ret
+ChecarArmadilha2 ENDP
+
 FimArmadilha:
     ret
 ChecarArmadilha ENDP
