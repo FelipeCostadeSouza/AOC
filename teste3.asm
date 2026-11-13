@@ -762,20 +762,26 @@ ProximoTile:
     jl LoopLinhas
 
     INVOKE DrawSprite, player_x, player_y, ADDR spriteJogador
-
     INVOKE DrawSprite, p2_x, p2_y, ADDR spriteJogador2
 
+    ; 2. Desenha o Escudo (se ativo)
     cmp hitboxEscudoAtivo, 1
     jne FimRenderEscudo
     
     mov eax, player_y
-    sub eax, 12                 
+    sub eax, 12                     
     mov edx, player_x
     INVOKE DrawSprite, edx, eax, ADDR spriteEscudo
 
 FimRenderEscudo:
-    LEA eax, bmi               
-    LEA eax, bmi
+
+    ; 3. Desenha o Projétil (se ativo)
+    cmp proj_ativo, 1
+    jne FimRenderProj
+    INVOKE DrawSprite, proj_x, proj_y, ADDR spriteProj
+
+FimRenderProj:
+    LEA eax, bmi                    
     INVOKE SetDIBitsToDevice, hDC, 0, 0, scr_w, scr_h, 0, 0, 0, scr_h, fb_ptr, eax, 0
     ret
 Renderizar ENDP
@@ -828,6 +834,7 @@ ExecutarJogo:
     CALL AtualizarFisica
     CALL ProcessarEntradaP2
     CALL AtualizarFisicaP2
+    CALL AtualizarProjRecebe
     CALL ChecarArmadilha
     CALL Renderizar
 
