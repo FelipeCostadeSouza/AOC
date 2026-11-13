@@ -309,7 +309,7 @@ FimArmadilha:
     ret
 ChecarArmadilha ENDP
 
-ChecarArmadilhaP2 PROC
+ChecarArmadilha2 PROC
     mov eax, p2_y
     add eax, 16
     xor edx, edx
@@ -328,7 +328,7 @@ ChecarArmadilhaP2 PROC
 
     mov bl, byte ptr [mapa + ecx]
     cmp bl, 2
-    jne FimArmadilhaP2
+    jne FimArmadilha2
 
     mov p2_x, POS_INICIAL_X
     mov p2_y, POS_INICIAL_Y
