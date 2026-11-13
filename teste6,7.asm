@@ -41,7 +41,7 @@ WNDCLASSEX_STRUCT STRUCT
     cbClsExtra      DWORD 0
     cbWndExtra      DWORD 0
     hInstance       DWORD ?
-    hIcon           DWORD 0ChecarArmadilha2 PROC
+    hIcon           DWORD 0
     hCursor         DWORD 0
     hbrBackground   DWORD 0
     lpszMenuName    DWORD 0
