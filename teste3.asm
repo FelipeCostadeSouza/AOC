@@ -2,9 +2,6 @@
 .model flat, stdcall
 .stack 4096
 
-; =========================================================================
-; PROTÓTIPOS DA WIN32 API
-; =========================================================================
 ExitProcess PROTO, dwExitCode:DWORD
 GetModuleHandleA PROTO, lpModuleName:DWORD
 RegisterClassExA PROTO, lpwcx:DWORD
@@ -23,9 +20,6 @@ SetDIBitsToDevice PROTO, hdc:DWORD, xDest:DWORD, yDest:DWORD, w:DWORD, h:DWORD, 
 Sleep PROTO, dwMilliseconds:DWORD
 GetAsyncKeyState PROTO, vKey:DWORD
 
-; =========================================================================
-; ESTRUTURAS WIN32
-; =========================================================================
 POINT_STRUCT STRUCT
     x DWORD ?
     y DWORD ?
@@ -69,9 +63,6 @@ BITMAPINFOHEADER STRUCT
     biClrImportant  DWORD 0
 BITMAPINFOHEADER ENDS
 
-; =========================================================================
-; CONSTANTES DO JOGO (Mapa 29x13)
-; =========================================================================
 .const
 LARGURA_MAPA    EQU 29
 ALTURA_MAPA     EQU 13
@@ -98,9 +89,6 @@ PM_REMOVE       EQU 0001h
 WM_DESTROY      EQU 0002h
 WS_OVERLAPPEDWINDOW EQU 00CF0000h
 
-; =========================================================================
-; DADOS DO JOGO (.data)
-; =========================================================================
 .data
 className       db "JanelaJogoClass", 0
 windowName      db "Plataforma MASM x86 - Engine Completa", 0
@@ -675,45 +663,36 @@ P2_SalvarVelocidade:
     cmp eax, 0
     jl P2_Subindo
 
-    ; --- VERIFICAÇÃO DE COLISÃO COM O ESCUDO DO JOGADOR 1 ---
     cmp hitboxEscudoAtivo, 1
     jne P2_ChecarChaoNormal
 
-    ; O topo do escudo fica em: (player_y - 12)
-    ; Vamos verificar se o pé do Jogador 2 (novoY + TAMANHO_TILE) está cruzando essa linha
     mov eax, novoY
     add eax, TAMANHO_TILE
     mov yPe, eax
 
-    ; Pega a coordenada Y exata do topo do escudo
     mov edx, player_y
     sub edx, 12
 
-    ; Verifica se o pé está descendo e atravessando/tocando o topo do escudo
     mov eax, p2_y
     add eax, TAMANHO_TILE
     dec eax
     cmp eax, edx
-    jg P2_ChecarChaoNormal         ; Se já passou, pula
+    jg P2_ChecarChaoNormal         
 
     cmp yPe, edx
-    jl P2_ChecarChaoNormal         ; Se ainda está acima, pula
-
-    ; Verifica a colisão horizontal (Eixo X) entre P2 e o Escudo (Player 1)
-    ; O escudo tem largura 32 e começa em player_x
+    jl P2_ChecarChaoNormal         
+    
     mov eax, p2_x
     add eax, TAMANHO_TILE
     dec eax
     cmp eax, player_x
-    jl P2_ChecarChaoNormal         ; P2 está totalmente à esquerda do escudo
+    jl P2_ChecarChaoNormal         
 
     mov eax, player_x
     add eax, TAMANHO_TILE
     cmp p2_x, eax
-    jge P2_ChecarChaoNormal        ; P2 está totalmente à direita do escudo
+    jge P2_ChecarChaoNormal       
 
-    ; --- COLIDIU COM O ESCUDO! ---
-    ; Posiciona o P2 exatamente em cima do escudo
     mov eax, edx
     sub eax, TAMANHO_TILE
     mov p2_y, eax
@@ -723,7 +702,6 @@ P2_SalvarVelocidade:
     ret
 
 P2_ChecarChaoNormal:
-    ; --- VERIFICAÇÃO NORMAL DE COLISÃO COM O MAPA (Chão) ---
     mov eax, novoY
     add eax, TAMANHO_TILE
     dec eax
