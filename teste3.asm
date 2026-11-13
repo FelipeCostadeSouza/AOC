@@ -304,6 +304,32 @@ FimArmadilha:
     ret
 ChecarArmadilha ENDP
 
+ChecarArmadilhaP2 PROC
+    mov eax, p2_y
+    add eax, 16
+    xor edx, edx
+    mov ecx, TAMANHO_TILE
+    div ecx
+    mov ebx, LARGURA_MAPA
+    mul ebx
+    mov ecx, eax
+
+    mov eax, p2_x
+    add eax, 16
+    xor edx, edx
+    mov ebx, TAMANHO_TILE
+    div ebx
+    add ecx, eax
+
+    mov bl, byte ptr [mapa + ecx]
+    cmp bl, 2
+    jne FimArmadilhaP2
+
+    mov p2_x, POS_INICIAL_X
+    mov p2_y, POS_INICIAL_Y
+    mov p2_velocidade_y, 0
+    mov p2_estaNoChao, 0
+
 ProcessarEscudo PROC
     LOCAL hbxX:DWORD, hbxY:DWORD
 
