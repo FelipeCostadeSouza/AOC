@@ -41,7 +41,32 @@ WNDCLASSEX_STRUCT STRUCT
     cbClsExtra      DWORD 0
     cbWndExtra      DWORD 0
     hInstance       DWORD ?
-    hIcon           DWORD 0
+    hIcon           DWORD 0ChecarArmadilha2 PROC
+    mov eax, p2_y
+    add eax, 16
+    xor edx, edx
+    mov ecx, TAMANHO_TILE
+    div ecx
+    mov ebx, LARGURA_MAPA
+    mul ebx
+    mov ecx, eax
+
+    mov eax, p2_x
+    add eax, 16
+    xor edx, edx
+    mov ebx, TAMANHO_TILE
+    div ebx
+    add ecx, eax
+
+    mov bl, byte ptr [mapa + ecx]
+    cmp bl, 2
+    jne FimArmadilha2
+
+    CALL ResetarFase
+
+FimArmadilha2:
+    ret
+ChecarArmadilha2 ENDP
     hCursor         DWORD 0
     hbrBackground   DWORD 0
     lpszMenuName    DWORD 0
@@ -877,6 +902,7 @@ ExecutarJogo:
     CALL AtualizarFisicaP2
     CALL AtualizarProjRecebe
     CALL ChecarArmadilha
+    CALL ChecarArmadilha2
     CALL Renderizar
 
     INVOKE Sleep, 16
