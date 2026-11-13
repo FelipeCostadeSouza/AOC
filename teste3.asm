@@ -85,10 +85,13 @@ FORCA_PULO      EQU -12
 GRAVIDADE       EQU 1
 VELOCIDADE_MAX  EQU 8
 
+VK_W            EQU 057h    
+VK_A            EQU 041h    
+VK_D            EQU 044h    
 VK_LEFT         EQU 025h
 VK_UP           EQU 026h
 VK_RIGHT        EQU 027h
-VK_DOWN         EQU 028h    ; Adicionada constante para Seta Para Baixo
+VK_DOWN         EQU 028h    
 VK_SPACE        EQU 020h
 VK_ESCAPE       EQU 01Bh
 PM_REMOVE       EQU 0001h
@@ -120,7 +123,11 @@ player_x        DWORD POS_INICIAL_X
 player_y        DWORD POS_INICIAL_Y
 velocidade_y    SDWORD 0
 estaNoChao      DWORD 0
-hitboxEscudoAtivo DWORD 0     ; Variável solicitada
+hitboxEscudoAtivo DWORD 0     
+p2_x            DWORD 128   
+p2_y            DWORD POS_INICIAL_Y
+p2_velocidade_y SDWORD 0
+p2_estaNoChao   DWORD 0
 
 scr_w           DWORD 928
 scr_h           DWORD 416
@@ -154,7 +161,12 @@ spriteJogador   db 32, 32
                 dd 20 dup(6 dup(0), 20 dup(0000FF00h), 6 dup(0))
                 dd 4 dup(6 dup(0), 8 dup(0000C000h), 4 dup(0), 8 dup(0000C000h), 6 dup(0))
 
-; Sprite simples para representar o Escudo (Cor azulada/ciano translúcida)
+spriteJogador2  db 32, 32
+                dd 4 dup(32 dup(00000000h))
+                dd 4 dup(10 dup(0), 4 dup(000088FFh), 4 dup(00FFFFFFh), 4 dup(000088FFh), 4 dup(00FFFFFFh), 6 dup(000088FFh), 0 dup(0))
+                dd 20 dup(6 dup(0), 20 dup(000088FFh), 6 dup(0))
+                dd 4 dup(6 dup(0), 8 dup(000044AAh), 4 dup(0), 8 dup(000044AAh), 6 dup(0))
+
 spriteEscudo    db 32, 12
                 dd 12 dup(32 dup(00FF8800h)) ; Barra retangular de 32x12 pixels
 
@@ -447,6 +459,143 @@ PuloSubindoOK:
     ret
 AtualizarFisica ENDP
 
+ProcessarEntradaP2 PROC
+    LOCAL novoX:DWORD, yTop:DWORD, yBottom:DWORD
+
+    mov eax, p2_y
+    add eax, 4
+    mov yTop, eax
+
+    mov eax, p2_y
+    add eax, TAMANHO_TILE
+    sub eax, 4
+    mov yBottom, eax
+
+    INVOKE GetAsyncKeyState, VK_A
+    test ax, 8000h
+    jz P2_ChecarDireita
+
+    mov eax, p2_x
+    sub eax, VELOCIDADE
+    mov novoX, eax
+
+    INVOKE ObterTilePixel, novoX, yTop
+    cmp bl, 1
+    je P2_ChecarDireita
+    INVOKE ObterTilePixel, novoX, yBottom
+    cmp bl, 1
+    je P2_ChecarDireita
+
+    mov eax, novoX
+    mov p2_x, eax
+
+P2_ChecarDireita:
+    INVOKE GetAsyncKeyState, VK_D
+    test ax, 8000h
+    jz P2_ChecarPulo
+
+    mov eax, p2_x
+    add eax, TAMANHO_TILE
+    dec eax
+    add eax, VELOCIDADE
+    mov novoX, eax
+
+    INVOKE ObterTilePixel, novoX, yTop
+    cmp bl, 1
+    je P2_ChecarPulo
+    INVOKE ObterTilePixel, novoX, yBottom
+    cmp bl, 1
+    je P2_ChecarPulo
+
+    mov eax, p2_x
+    add eax, VELOCIDADE
+    mov p2_x, eax
+
+P2_ChecarPulo:
+    INVOKE GetAsyncKeyState, VK_W
+    test ax, 8000h
+    jz P2_FimEntrada
+
+    cmp p2_estaNoChao, 1
+    jne P2_FimEntrada
+
+    mov p2_velocidade_y, FORCA_PULO
+    mov p2_estaNoChao, 0
+
+P2_FimEntrada:
+    ret
+ProcessarEntradaP2 ENDP
+
+AtualizarFisicaP2 PROC
+    LOCAL novoY:DWORD, yPe:DWORD
+
+    mov eax, p2_velocidade_y
+    add eax, GRAVIDADE
+
+    cmp eax, VELOCIDADE_MAX
+    jle P2_SalvarVelocidade
+    mov eax, VELOCIDADE_MAX
+
+P2_SalvarVelocidade:
+    mov p2_velocidade_y, eax
+
+    mov eax, p2_y
+    add eax, p2_velocidade_y
+    mov novoY, eax
+
+    mov eax, p2_velocidade_y
+    cmp eax, 0
+    jl P2_Subindo
+
+    mov eax, novoY
+    add eax, TAMANHO_TILE
+    dec eax
+    mov yPe, eax
+
+    mov ebx, p2_x
+    add ebx, 4
+    INVOKE ObterTilePixel, ebx, yPe
+    cmp bl, 1
+    je P2_ColidiuComChao
+
+    mov ebx, p2_x
+    add ebx, TAMANHO_TILE
+    sub ebx, 4
+    INVOKE ObterTilePixel, ebx, yPe
+    cmp bl, 1
+    je P2_ColidiuComChao
+
+    mov eax, novoY
+    mov p2_y, eax
+    mov p2_estaNoChao, 0
+    ret
+
+P2_ColidiuComChao:
+    mov eax, yPe
+    xor edx, edx
+    mov ecx, TAMANHO_TILE
+    div ecx
+    imul eax, TAMANHO_TILE
+    sub eax, TAMANHO_TILE
+    mov p2_y, eax
+
+    mov p2_velocidade_y, 0
+    mov p2_estaNoChao, 1
+    ret
+
+P2_Subindo:
+    cmp novoY, 0
+    jge P2_PuloSubindoOK
+    mov novoY, 0
+    mov p2_velocidade_y, 0
+
+P2_PuloSubindoOK:
+    mov eax, novoY
+    mov p2_y, eax
+    mov p2_estaNoChao, 0
+    ret
+AtualizarFisicaP2 ENDP
+
 Renderizar PROC
     LOCAL linha:DWORD, coluna:DWORD
     LOCAL pixelX:DWORD, pixelY:DWORD
@@ -498,20 +647,20 @@ ProximoTile:
     cmp linha, ALTURA_MAPA
     jl LoopLinhas
 
-    ; Renderiza o Jogador
     INVOKE DrawSprite, player_x, player_y, ADDR spriteJogador
 
-    ; Renderiza o Escudo se ativado (tecla Baixo pressionada)
+    INVOKE DrawSprite, p2_x, p2_y, ADDR spriteJogador2
+
     cmp hitboxEscudoAtivo, 1
     jne FimRenderEscudo
     
     mov eax, player_y
-    sub eax, 12                 ; Altura do sprite do escudo (12 pixels acima do jogador)
+    sub eax, 12                 
     mov edx, player_x
     INVOKE DrawSprite, edx, eax, ADDR spriteEscudo
 
 FimRenderEscudo:
-    LEAs eax, bmi               ; Correção do LEA para formato padrão do MASM
+    LEA eax, bmi               
     LEA eax, bmi
     INVOKE SetDIBitsToDevice, hDC, 0, 0, scr_w, scr_h, 0, 0, 0, scr_h, fb_ptr, eax, 0
     ret
@@ -561,8 +710,10 @@ ExecutarJogo:
     jnz SairPrograma
 
     CALL ProcessarEntrada
-    CALL ProcessarEscudo    ; Chamada da nova função de controle do escudo
+    CALL ProcessarEscudo   
     CALL AtualizarFisica
+    CALL ProcessarEntradaP2
+    CALL AtualizarFisicaP2
     CALL ChecarArmadilha
     CALL Renderizar
 
