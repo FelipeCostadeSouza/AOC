@@ -654,6 +654,7 @@ P2_FimEntrada:
 ProcessarEntradaP2 ENDP
 
 AtualizarFisicaP2 PROC
+AtualizarFisicaP2 PROC
     LOCAL novoY:DWORD, yPe:DWORD
 
     mov eax, p2_velocidade_y
@@ -674,6 +675,55 @@ P2_SalvarVelocidade:
     cmp eax, 0
     jl P2_Subindo
 
+    ; --- VERIFICAÇÃO DE COLISÃO COM O ESCUDO DO JOGADOR 1 ---
+    cmp hitboxEscudoAtivo, 1
+    jne P2_ChecarChaoNormal
+
+    ; O topo do escudo fica em: (player_y - 12)
+    ; Vamos verificar se o pé do Jogador 2 (novoY + TAMANHO_TILE) está cruzando essa linha
+    mov eax, novoY
+    add eax, TAMANHO_TILE
+    mov yPe, eax
+
+    ; Pega a coordenada Y exata do topo do escudo
+    mov edx, player_y
+    sub edx, 12
+
+    ; Verifica se o pé está descendo e atravessando/tocando o topo do escudo
+    mov eax, p2_y
+    add eax, TAMANHO_TILE
+    dec eax
+    cmp eax, edx
+    jg P2_ChecarChaoNormal         ; Se já passou, pula
+
+    cmp yPe, edx
+    jl P2_ChecarChaoNormal         ; Se ainda está acima, pula
+
+    ; Verifica a colisão horizontal (Eixo X) entre P2 e o Escudo (Player 1)
+    ; O escudo tem largura 32 e começa em player_x
+    mov eax, p2_x
+    add eax, TAMANHO_TILE
+    dec eax
+    cmp eax, player_x
+    jl P2_ChecarChaoNormal         ; P2 está totalmente à esquerda do escudo
+
+    mov eax, player_x
+    add eax, TAMANHO_TILE
+    cmp p2_x, eax
+    jge P2_ChecarChaoNormal        ; P2 está totalmente à direita do escudo
+
+    ; --- COLIDIU COM O ESCUDO! ---
+    ; Posiciona o P2 exatamente em cima do escudo
+    mov eax, edx
+    sub eax, TAMANHO_TILE
+    mov p2_y, eax
+
+    mov p2_velocidade_y, 0
+    mov p2_estaNoChao, 1
+    ret
+
+P2_ChecarChaoNormal:
+    ; --- VERIFICAÇÃO NORMAL DE COLISÃO COM O MAPA (Chão) ---
     mov eax, novoY
     add eax, TAMANHO_TILE
     dec eax
