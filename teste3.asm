@@ -119,15 +119,19 @@ mapa db 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 
      db 1, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1
      db 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1
 
-player_x        DWORD POS_INICIAL_X
-player_y        DWORD POS_INICIAL_Y
-velocidade_y    SDWORD 0
-estaNoChao      DWORD 0
-hitboxEscudoAtivo DWORD 0     
-p2_x            DWORD 128   
-p2_y            DWORD POS_INICIAL_Y
-p2_velocidade_y SDWORD 0
-p2_estaNoChao   DWORD 0
+player_x            DWORD POS_INICIAL_X
+player_y            DWORD POS_INICIAL_Y
+velocidade_y        SDWORD 0
+estaNoChao          DWORD 0
+hitboxEscudoAtivo   DWORD 0     
+p2_x                DWORD 128   
+p2_y                DWORD POS_INICIAL_Y
+p2_velocidade_y     SDWORD 0
+p2_estaNoChao       DWORD 0
+proj_x              DWORD 400   
+proj_y              DWORD 200   
+proj_vel_x          SDWORD -6   
+proj_ativo          DWORD 1     
 
 scr_w           DWORD 928
 scr_h           DWORD 416
@@ -262,6 +266,8 @@ FimDesenho:
     ret
 DrawSprite ENDP
 
+
+
 WndProc PROC hWin:DWORD, uMsg:DWORD, wParam:DWORD, lParam:DWORD
     cmp uMsg, WM_DESTROY
     je OnDestroy
@@ -273,6 +279,26 @@ OnDestroy:
     xor eax, eax
     ret
 WndProc ENDP
+
+ResetarFase PROC
+    ; Reseta o Jogador 1
+    mov player_x, POS_INICIAL_X
+    mov player_y, POS_INICIAL_Y
+    mov velocidade_y, 0
+    mov estaNoChao, 0
+
+    ; Reseta o Jogador 2 (com uma posição X ligeiramente diferente para não sobrepô-los)
+    mov p2_x, 128
+    mov p2_y, POS_INICIAL_Y
+    mov p2_velocidade_y, 0
+    mov p2_estaNoChao, 0
+
+    ; Reseta o Projétil para a posição inicial
+    mov proj_x, 400
+    mov proj_y, 200
+    mov proj_ativo, 1
+    ret
+ResetarFase ENDP
 
 ChecarArmadilha PROC
     mov eax, player_y
@@ -295,15 +321,7 @@ ChecarArmadilha PROC
     cmp bl, 2
     jne FimArmadilha
 
-    mov player_x, POS_INICIAL_X
-    mov player_y, POS_INICIAL_Y
-    mov velocidade_y, 0
-    mov estaNoChao, 0
-
-    mov p2_x, POS_INICIAL_X
-    mov p2_y, POS_INICIAL_Y
-    mov p2_velocidade_y, 0
-    mov p2_estaNoChao, 0
+    CALL ResetarFase
 
 FimArmadilha:
     ret
@@ -330,15 +348,8 @@ ChecarArmadilha2 PROC
     cmp bl, 2
     jne FimArmadilha2
 
-    mov p2_x, POS_INICIAL_X
-    mov p2_y, POS_INICIAL_Y
-    mov p2_velocidade_y, 0
-    mov p2_estaNoChao, 0
+    CALL ResetarFase
 
-    mov player_x, POS_INICIAL_X
-    mov player_y, POS_INICIAL_Y
-    mov velocidade_y, 0
-    mov estaNoChao, 0
 FimArmadilha2:
     ret
 ChecarArmadilha2 ENDP
@@ -357,6 +368,70 @@ DesativarEscudo:
     mov hitboxEscudoAtivo, 0
     ret
 ProcessarEscudo ENDP
+
+AtualizarProjRecebe PROC
+    cmp proj_ativo, 1
+    jne FimProj
+
+    mov eax, proj_vel_x
+    add proj_x, eax
+
+    cmp proj_x, 32
+    jl ReiniciarProjLoop
+    
+    mov eax, player_x
+    add eax, 32
+    cmp proj_x, eax
+    jge ChecarPlayer2
+
+    mov eax, proj_x
+    add eax, 16                 
+    cmp eax, player_x
+    jle ChecarPlayer2
+
+    mov eax, player_y
+    add eax, 32
+    cmp proj_y, eax
+    jge ChecarPlayer2
+
+    mov eax, proj_y
+    add eax, 16                 
+    cmp eax, player_y
+    jle ChecarPlayer2
+
+    CALL ResetarFase
+    ret
+
+ChecarPlayer2:
+    mov eax, p2_x
+    add eax, 32
+    cmp proj_x, eax
+    jge FimProj
+
+    mov eax, proj_x
+    add eax, 16
+    cmp eax, p2_x
+    jle FimProj
+
+    mov eax, p2_y
+    add eax, 32
+    cmp proj_y, eax
+    jge FimProj
+
+    mov eax, proj_y
+    add eax, 16
+    cmp eax, p2_y
+    jle FimProj
+
+    CALL ResetarFase
+    ret
+
+ReiniciarProjLoop:
+    mov proj_x, 800
+
+FimProj:
+    ret
+AtualizarProjRecebe ENDP
 
 ProcessarEntrada PROC
     LOCAL novoX:DWORD, yTop:DWORD, yBottom:DWORD
