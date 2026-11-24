@@ -103,7 +103,7 @@ SetConsoleOutputCP PROTO, wCodePageID:DWORD
             mov personagem2_y, 11
             mov reset1_x, 2
             mov reset1_y, 11
-            mov reset2_x, 2
+            mov reset2_x, 3
             mov reset2_y, 11
             jmp montarMapa
 
@@ -115,7 +115,7 @@ SetConsoleOutputCP PROTO, wCodePageID:DWORD
             mov personagem2_y, 8
             mov reset1_x, 1
             mov reset1_y, 8
-            mov reset2_x, 1
+            mov reset2_x, 2
             mov reset2_y, 8
             jmp montarMapa
 
@@ -127,7 +127,7 @@ SetConsoleOutputCP PROTO, wCodePageID:DWORD
             mov personagem2_y, 8
             mov reset1_x, 15
             mov reset1_y, 8
-            mov reset2_x, 15
+            mov reset2_x, 16
             mov reset2_y, 8
 
         montarMapa:
