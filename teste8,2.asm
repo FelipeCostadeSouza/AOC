@@ -99,7 +99,7 @@ SetConsoleOutputCP PROTO, wCodePageID:DWORD
             mov edx, OFFSET nomeFase1
             mov personagem1_x, 2
             mov personagem1_y, 11
-            mov personagem2_x, 2
+            mov personagem2_x, 3
             mov personagem2_y, 11
             mov reset1_x, 2
             mov reset1_y, 11
@@ -180,10 +180,10 @@ SetConsoleOutputCP PROTO, wCodePageID:DWORD
         loopJogo:
             INVOKE SetConsoleCursorPosition, hConsole, 0
 
-            direita:
+direita:
                 INVOKE GetAsyncKeyState, 44h
                 and eax, 8000h
-                jz esquerda
+                jz direita2
 
                 mov eax, personagem1_y
                 mov ebx, LARGURA_MAPA
@@ -192,14 +192,14 @@ SetConsoleOutputCP PROTO, wCodePageID:DWORD
                 add ebx, 1
                 add eax, ebx
                 mov bl, byte ptr [mapa + eax]
-                cmp bl, '#'  
+                cmp bl, '#'
                 je direita2
                 inc personagem1_x
 
             direita2:
                 INVOKE GetAsyncKeyState, 27h
                 and eax, 8000h
-                jz esquerda2
+                jz esquerda
 
                 mov eax, personagem2_y
                 mov ebx, LARGURA_MAPA
@@ -208,14 +208,14 @@ SetConsoleOutputCP PROTO, wCodePageID:DWORD
                 add ebx, 1
                 add eax, ebx
                 mov bl, byte ptr [mapa + eax]
-                cmp bl, '#'  
+                cmp bl, '#'
                 je esquerda
                 inc personagem2_x
 
             esquerda:
                 INVOKE GetAsyncKeyState, 41h
                 and eax, 8000h
-                jz pulo
+                jz esquerda2
 
                 mov eax, personagem1_y
                 mov ebx, LARGURA_MAPA
@@ -231,7 +231,7 @@ SetConsoleOutputCP PROTO, wCodePageID:DWORD
             esquerda2:
                 INVOKE GetAsyncKeyState, 25h
                 and eax, 8000h
-                jz pulo2
+                jz pulo
 
                 mov eax, personagem2_y
                 mov ebx, LARGURA_MAPA
@@ -246,10 +246,10 @@ SetConsoleOutputCP PROTO, wCodePageID:DWORD
 
             pulo:
                 cmp noAR, 0
-                jne gravidade
+                jne pulo2
                 INVOKE GetAsyncKeyState, 57h
                 and eax, 8000h
-                jz gravidade
+                jz pulo2
                 mov noAr, 1
                 mov velocidadeAtual, velocidade
                 mov ebx, velocidadeAtual
@@ -257,10 +257,10 @@ SetConsoleOutputCP PROTO, wCodePageID:DWORD
 
             pulo2:
                 cmp noAR2, 0
-                jne gravidade2
+                jne gravidade
                 INVOKE GetAsyncKeyState, 26h
                 and eax, 8000h
-                jz gravidade2
+                jz gravidade
                 mov noAr2, 1
                 mov velocidadeAtual, velocidade
                 mov ebx, velocidadeAtual
@@ -276,11 +276,10 @@ SetConsoleOutputCP PROTO, wCodePageID:DWORD
                 cmp bl, '#'
                 je chao
                 inc personagem1_y
-                jmp direita2
+                jmp gravidade2
 
                 chao:
                     mov noAr, 0
-
 
             gravidade2:
                 mov eax, personagem2_y
@@ -292,7 +291,7 @@ SetConsoleOutputCP PROTO, wCodePageID:DWORD
                 cmp bl, '#'
                 je chao2
                 inc personagem2_y
-                jmp desenho
+                jmp checaArmadilha
 
                 chao2:
                     mov noAr2, 0
@@ -304,7 +303,7 @@ SetConsoleOutputCP PROTO, wCodePageID:DWORD
                 add eax, personagem1_x
                 mov bl, byte ptr [mapa + eax]
                 cmp bl, '^'
-                jne direita2
+                jne checaArmadilha2
 
                 mov ebx, reset1_x
                 mov ecx, reset1_y
@@ -346,12 +345,12 @@ SetConsoleOutputCP PROTO, wCodePageID:DWORD
                 verificaColuna:
                     mov edx, personagem1_x
                     cmp coluna, edx
-                    jne continua
+                    jne verificaColuna2
 
                     verificaLinha:
                         mov edx, personagem1_y
                         cmp linha, edx
-                        jne continua
+                        jne verificaColuna2
 
                     imprimePersonagem:
                         INVOKE WriteConsoleA, hConsole, ADDR personagem1, 1, ADDR bytesEscritos, 0
