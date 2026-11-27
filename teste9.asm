@@ -56,23 +56,28 @@ SetConsoleOutputCP PROTO, wCodePageID:DWORD
     personagem2 db "&"
     personagem2_x DWORD ?
     personagem2_y DWORD ?
+
     flecha db ">"
     flecha_x DWORD ?
     flecha_y DWORD ?
-    flechaAtiva DWORD 0
+
     escudo db "-"
-    escudoAtivo DWORD 0
     hbescudo_x DWORD 0
     hbescudo_y DWORD 0
+
     reset1_x DWORD ?
     reset1_y DWORD ?
     reset2_x DWORD ?
     reset2_y DWORD ?
+
     linha DWORD ?
     coluna DWORD ?
     velocidadeAtual DWORD ?
     noAR DWORD ?    
     noAR2 DWORD ?
+
+    escudoAtivo DWORD 0
+    flechaAtiva DWORD 0
 
 
 .code
@@ -269,16 +274,8 @@ SetConsoleOutputCP PROTO, wCodePageID:DWORD
                 mov ebx, flecha_x
                 sub ebx, 1
                 add eax, ebx
-                jmp FlechaLoop
-                
-
-            Flechaloop:
-                dec flecha_x
-                mov bl, byte ptr [mapa + eax]
-                cmp bl, '#'
-                jne FlechaLoop
-                jmp pulo
-
+                jmp EscudoBlock
+              
 
             EscudoBlock:
                 mov escudoAtivo, 0
@@ -291,18 +288,20 @@ SetConsoleOutputCP PROTO, wCodePageID:DWORD
                 and eax, 8000h
                 jz pulo
 
-                mov escudoAtivo, 1
-
-                mov eax, personagem2_x
-                mov hbescudo_x, eax
-
                 mov eax, personagem2_y
                 cmp eax, 0
-                je  pulo              
+                je  sem_escudo              
                 dec eax
                 mov hbescudo_y, eax
 
-                mov al, escudo
+                mov escudoAtivo, 1
+                mov eax, personagem2_x
+                mov hbescudo_x, eax
+                jmp pulo
+
+                sem_escudo:
+                    mov escudoAtivo, 0
+                    jmp pulo
 
             pulo:
                 cmp noAR, 0
@@ -345,11 +344,27 @@ SetConsoleOutputCP PROTO, wCodePageID:DWORD
                 mov bl, byte ptr [mapa + eax]
                 cmp bl, '#'
                 je chao
+
+                cmp escudoAtivo, 1
+                jne cair
+
+                mov eax, personagem1_x
+                cmp eax, hbescudo_x
+                jne cair
+
+                mov eax, personagem1_y
+                inc eax
+                cmp eax, hbescudo_y
+                je  chao
+
+            cair:
                 inc personagem1_y
                 jmp gravidade2
 
-                chao:
-                    mov noAr, 0
+            chao:
+                mov noAr, 0
+
+                
 
             gravidade2:
                 mov eax, personagem2_y
@@ -441,12 +456,12 @@ SetConsoleOutputCP PROTO, wCodePageID:DWORD
                 verificaColuna2:
                     mov edx, personagem2_x
                     cmp coluna, edx
-                    jne verificaColunaFlecha
+                    jne verificaColunaEscudo
 
                     verificaLinha2:
                         mov edx, personagem2_y
                         cmp linha, edx
-                        jne verificaColunaFlecha
+                        jne verificaColunaEscudo
 
                     imprimePersonagem2:
                         INVOKE WriteConsoleA, hConsole, ADDR personagem2, 1, ADDR bytesEscritos, 0
@@ -483,7 +498,6 @@ SetConsoleOutputCP PROTO, wCodePageID:DWORD
                         INVOKE WriteConsoleA, hConsole, ADDR flecha, 1, ADDR bytesEscritos, 0
                         jmp proximoTile                 
                         
-
 
                 continua:
                 cmp cl, '#'
